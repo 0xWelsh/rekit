@@ -45,3 +45,10 @@ install:
 	cp $(BIN_DIR)/* /usr/local/bin/
 
 .PHONY: all clean install
+
+$(BIN_DIR)/rekit-gui: gui/rekit-gui.c
+	$(CC) $(CFLAGS) -o $@ $< `pkg-config --cflags --libs gtk+-3.0`
+
+gui: $(BIN_DIR) $(BIN_DIR)/rekit-gui
+
+.PHONY: gui

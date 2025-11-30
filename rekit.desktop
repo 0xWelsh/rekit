@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=REKit
+Comment=Reverse Engineering Toolkit
+Exec=/home/welsh/reverse_engineering/rekit/rekit-gui.sh
+Icon=utilities-terminal
+Terminal=false
+Categories=Development;Debugger;

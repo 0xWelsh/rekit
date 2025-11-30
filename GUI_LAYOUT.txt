@@ -1,0 +1,56 @@
+╔═══════════════════════════════════════════════════════════════════════╗
+║  REKit - Reverse Engineering Toolkit                            [_][□][X]║
+╠═══════════════════════════════════════════════════════════════════════╣
+║                                                                       ║
+║  ┌─────────────────────────────────────────────────────────────────┐ ║
+║  │ [Dynamic Analysis] [Static Analysis] [Memory]                   │ ║
+║  ├─────────────────────────────────────────────────────────────────┤ ║
+║  │                                                                  │ ║
+║  │  Target:  [/bin/cat________________________] [Browse...]        │ ║
+║  │                                                                  │ ║
+║  │  Functions: [open read write close________]                     │ ║
+║  │                                                                  │ ║
+║  │  [  Trace Syscalls  ]    [  Hook Functions  ]                  │ ║
+║  │                                                                  │ ║
+║  └─────────────────────────────────────────────────────────────────┘ ║
+║                                                                       ║
+║  ┌─ Output ──────────────────────────────────────────────────────┐  ║
+║  │ === Function Hooks ===                                         │  ║
+║  │                                                                 │  ║
+║  │ [+] Hooked open at 0x7f1234567890                             │  ║
+║  │ [+] Hooked read at 0x7f1234567900                             │  ║
+║  │ [+] Hooked write at 0x7f1234567910                            │  ║
+║  │ [+] Hooked close at 0x7f1234567920                            │  ║
+║  │                                                                 │  ║
+║  │ [*] Starting trace...                                          │  ║
+║  │                                                                 │  ║
+║  │ [HOOK] open()                                                  │  ║
+║  │   RDI: 0x7ffd12345678  RSI: 0x0  RDX: 0x0                     │  ║
+║  │                                                                 │  ║
+║  │ [HOOK] read()                                                  │  ║
+║  │   RDI: 0x3  RSI: 0x7f1234560000  RDX: 0x2000                  │  ║
+║  │                                                                 │  ║
+║  │ [HOOK] write()                                                 │  ║
+║  │   RDI: 0x1  RSI: 0x7f1234560000  RDX: 0x100                   │  ║
+║  │                                                                 │  ║
+║  │ [HOOK] close()                                                 │  ║
+║  │   RDI: 0x3  RSI: 0x0  RDX: 0x0                                │  ║
+║  │                                                                 │  ║
+║  │ [*] Process exited                                             │  ║
+║  │                                                                 │  ║
+║  └─────────────────────────────────────────────────────────────────┘  ║
+║                                                                       ║
+╚═══════════════════════════════════════════════════════════════════════╝
+
+TABS:
+  [Dynamic Analysis] - Syscall tracing, function hooking
+  [Static Analysis]  - String extraction, PE parsing  
+  [Memory]          - Memory dumping, hex viewer
+
+FEATURES:
+  • File browser for easy target selection
+  • Real-time output in monospace font
+  • Scrollable output panel
+  • Clean, organized interface
+  • Automatic timeout protection
+  • Error handling and display

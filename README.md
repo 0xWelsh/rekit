@@ -174,3 +174,22 @@ These tools use ptrace and require appropriate permissions:
 ## License
 
 Educational and research purposes only.
+
+## GUI Interface
+
+REKit now includes a graphical interface!
+
+### Launch GUI
+```bash
+./rekit-gui.sh
+```
+
+### Features
+- **Dynamic Analysis** - Trace syscalls, hook functions
+- **Static Analysis** - Extract strings, parse PE files
+- **Memory Dump** - Dump process memory with hex view
+- **File Browser** - Easy file selection
+- **Output Panel** - View results in real-time
+
+See `GUI_README.md` for detailed documentation.
+
