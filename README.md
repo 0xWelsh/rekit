@@ -84,6 +84,30 @@ Builds all tools to `bin/` directory.
 
 ## Usage Examples
 
+### Full automated analysis
+```bash
+./examples/full_analysis.sh /path/to/binary
+```
+
+### Malware triage (static only - safe)
+```bash
+./examples/malware_triage.sh suspicious.exe
+```
+
+### Dynamic trace analysis
+```bash
+./examples/trace_analysis.sh /bin/cat file.txt
+```
+
+### Memory dump analysis
+```bash
+./examples/memory_analysis.sh firefox
+# or by PID
+./examples/memory_analysis.sh 1234
+```
+
+### Manual tool usage
+
 ### Hook all file operations
 ```bash
 ./bin/dbi-advanced /usr/bin/cat open read close
