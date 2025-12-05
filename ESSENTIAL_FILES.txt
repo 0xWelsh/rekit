@@ -8,27 +8,35 @@ READ THESE FILES (in order):
    → Learn: ptrace basics, syscall interception
    → Simplest tool, start here
 
-2. tools/memdump.c               [70 lines]  ★☆☆☆☆
-   → Learn: Memory reading, hex dump
+2. tools/memdump.c               [120 lines] ★☆☆☆☆
+   → Learn: Memory reading, hex dump, error handling
    → Easy to understand
 
-3. analysis/strings.c            [60 lines]  ★☆☆☆☆
-   → Learn: File parsing, string extraction
+3. analysis/strings.c            [100 lines] ★☆☆☆☆
+   → Learn: File parsing, string extraction, JSON output
    → No ptrace, just file I/O
 
-4. dbi/dbi-framework.c          [200 lines]  ★★★☆☆
+4. analysis/anti_debug_detect.c  [250 lines] ★★☆☆☆
+   → Learn: Pattern matching, ELF analysis, anti-debug techniques
+   → Static analysis
+
+5. dbi/dbi-framework.c          [200 lines]  ★★★☆☆
    → Learn: Breakpoints, register inspection
    → Core DBI concepts
 
-5. parsers/pe-parser.c          [150 lines]  ★★☆☆☆
+6. parsers/pe-parser.c          [150 lines]  ★★☆☆☆
    → Learn: Binary formats, structure parsing
    → Windows PE format
 
-6. dbi/dbi-advanced.c           [150 lines]  ★★★★☆
+7. parsers/elf-parser.c         [200 lines]  ★★☆☆☆
+   → Learn: ELF format, sections, symbols
+   → Linux binary format
+
+8. dbi/dbi-advanced.c           [150 lines]  ★★★★☆
    → Learn: Symbol resolution, function hooking
    → Most complex DBI
 
-7. gui/rekit-gui.c              [350 lines]  ★★★☆☆
+9. gui/rekit-gui.c              [350 lines]  ★★★☆☆
    → Learn: GTK, GUI integration
    → Ties everything together
 

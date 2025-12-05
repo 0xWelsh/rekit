@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
+#include <errno.h>
 
 void print_elf_header(Elf64_Ehdr *ehdr) {
     printf("\n=== ELF Header ===\n");
@@ -166,7 +167,8 @@ void print_symbols(void *base, Elf64_Ehdr *ehdr) {
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
-        printf("Usage: %s <elf_file> [--json]\n", argv[0]);
+        fprintf(stderr, "Usage: %s <elf_file> [--json]\n", argv[0]);
+        fprintf(stderr, "  --json: output in JSON format\n");
         return 1;
     }
     
@@ -174,20 +176,52 @@ int main(int argc, char *argv[]) {
     
     int fd = open(argv[1], O_RDONLY);
     if (fd < 0) {
-        perror("open");
+        if (json_mode) {
+            printf("{\"error\": \"Cannot open file: %s\"}\n", strerror(errno));
+        } else {
+            fprintf(stderr, "Error: Cannot open file '%s': %s\n", argv[1], strerror(errno));
+        }
         return 1;
     }
     
     struct stat st;
     if (fstat(fd, &st) < 0) {
-        perror("fstat");
+        if (json_mode) {
+            printf("{\"error\": \"Cannot stat file: %s\"}\n", strerror(errno));
+        } else {
+            fprintf(stderr, "Error: Cannot stat file: %s\n", strerror(errno));
+        }
+        close(fd);
+        return 1;
+    }
+    
+    if (st.st_size < sizeof(Elf64_Ehdr)) {
+        if (json_mode) {
+            printf("{\"error\": \"File too small to be valid ELF\"}\n");
+        } else {
+            fprintf(stderr, "Error: File too small to be valid ELF\n");
+        }
+        close(fd);
+        return 1;
+    }
+    
+    if (st.st_size > 500 * 1024 * 1024) {  // 500MB limit
+        if (json_mode) {
+            printf("{\"error\": \"File too large (max 500MB)\"}\n");
+        } else {
+            fprintf(stderr, "Error: File too large (max 500MB)\n");
+        }
         close(fd);
         return 1;
     }
     
     void *base = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
     if (base == MAP_FAILED) {
-        perror("mmap");
+        if (json_mode) {
+            printf("{\"error\": \"Memory mapping failed: %s\"}\n", strerror(errno));
+        } else {
+            fprintf(stderr, "Error: Memory mapping failed: %s\n", strerror(errno));
+        }
         close(fd);
         return 1;
     }

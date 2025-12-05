@@ -60,6 +60,19 @@ A comprehensive collection of reverse engineering tools for binary analysis, dyn
 - Extract ASCII strings
 - Show file offsets
 - Configurable minimum length
+- JSON output support
+
+**anti-debug-detect** - Detect anti-debugging techniques
+```bash
+./bin/anti-debug-detect binary
+```
+- Detects ptrace checks
+- Identifies timing checks
+- Finds breakpoint detection
+- Checks parent process validation
+- Detects LD_PRELOAD checks
+- Risk scoring (LOW/MEDIUM/HIGH)
+- JSON output support
 
 **memdump** - Memory dumper
 ```bash
@@ -81,6 +94,15 @@ Builds all tools to `bin/` directory.
 - gcc
 - libcapstone-dev
 - Linux kernel with ptrace support
+
+### Error Handling
+All tools include comprehensive error checking:
+- Input validation
+- Descriptive error messages
+- JSON error format support
+- Proper exit codes
+
+See `docs/ERROR_HANDLING.md` for details.
 
 ## Usage Examples
 

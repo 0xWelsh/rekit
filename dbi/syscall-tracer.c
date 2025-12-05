@@ -5,6 +5,8 @@
 #include <sys/wait.h>
 #include <sys/user.h>
 #include <sys/syscall.h>
+#include <errno.h>
+#include <string.h>
 
 const char *syscall_names[] = {
     [0] = "read", [1] = "write", [2] = "open", [3] = "close",
@@ -22,12 +24,27 @@ void trace_syscalls(pid_t pid) {
     printf("[*] Tracing syscalls for PID %d\n\n", pid);
     
     while (1) {
-        ptrace(PTRACE_SYSCALL, pid, NULL, NULL);
-        waitpid(pid, &status, 0);
+        if (ptrace(PTRACE_SYSCALL, pid, NULL, NULL) < 0) {
+            if (errno == ESRCH) break;  // Process exited
+            fprintf(stderr, "Error: ptrace(SYSCALL) failed: %s\n", strerror(errno));
+            break;
+        }
+        
+        if (waitpid(pid, &status, 0) < 0) {
+            fprintf(stderr, "Error: waitpid failed: %s\n", strerror(errno));
+            break;
+        }
         
         if (WIFEXITED(status)) break;
+        if (WIFSIGNALED(status)) {
+            fprintf(stderr, "\n[*] Process terminated by signal %d\n", WTERMSIG(status));
+            break;
+        }
         
-        ptrace(PTRACE_GETREGS, pid, NULL, &regs);
+        if (ptrace(PTRACE_GETREGS, pid, NULL, &regs) < 0) {
+            fprintf(stderr, "Error: ptrace(GETREGS) failed: %s\n", strerror(errno));
+            break;
+        }
         
         if (!in_syscall) {
             const char *name = (regs.orig_rax < sizeof(syscall_names)/sizeof(char*) && 
@@ -46,19 +63,43 @@ void trace_syscalls(pid_t pid) {
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
-        printf("Usage: %s <program> [args...]\n", argv[0]);
+        fprintf(stderr, "Usage: %s <program> [args...]\n", argv[0]);
+        fprintf(stderr, "Traces system calls made by the program\n");
+        return 1;
+    }
+    
+    if (access(argv[1], X_OK) != 0) {
+        fprintf(stderr, "Error: Cannot execute '%s': %s\n", argv[1], strerror(errno));
         return 1;
     }
     
     pid_t pid = fork();
+    if (pid < 0) {
+        fprintf(stderr, "Error: Fork failed: %s\n", strerror(errno));
+        return 1;
+    }
+    
     if (pid == 0) {
-        ptrace(PTRACE_TRACEME, 0, NULL, NULL);
+        if (ptrace(PTRACE_TRACEME, 0, NULL, NULL) < 0) {
+            fprintf(stderr, "Error: ptrace(TRACEME) failed: %s\n", strerror(errno));
+            exit(1);
+        }
         execvp(argv[1], &argv[1]);
+        fprintf(stderr, "Error: exec failed: %s\n", strerror(errno));
         exit(1);
     }
     
     int status;
-    waitpid(pid, &status, 0);
+    if (waitpid(pid, &status, 0) < 0) {
+        fprintf(stderr, "Error: waitpid failed: %s\n", strerror(errno));
+        return 1;
+    }
+    
+    if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
+        fprintf(stderr, "Error: Child process failed to start\n");
+        return 1;
+    }
+    
     trace_syscalls(pid);
     return 0;
 }

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <errno.h>
 
 void print_json_string(long offset, const char *str, int *first) {
     if (!*first) printf(",\n");
@@ -21,20 +22,79 @@ void extract_strings(const char *filename, int min_len, int json_mode) {
     FILE *f = fopen(filename, "rb");
     if (!f) {
         if (json_mode) {
-            printf("{\"error\": \"Cannot open file\"}\n");
+            printf("{\"error\": \"Cannot open file: %s\"}\n", strerror(errno));
         } else {
-            perror("fopen");
+            fprintf(stderr, "Error: Cannot open file '%s': %s\n", filename, strerror(errno));
         }
         return;
     }
     
-    fseek(f, 0, SEEK_END);
+    if (fseek(f, 0, SEEK_END) != 0) {
+        if (json_mode) {
+            printf("{\"error\": \"Cannot seek file\"}\n");
+        } else {
+            fprintf(stderr, "Error: Cannot seek file\n");
+        }
+        fclose(f);
+        return;
+    }
+    
     long size = ftell(f);
+    if (size < 0) {
+        if (json_mode) {
+            printf("{\"error\": \"Cannot determine file size\"}\n");
+        } else {
+            fprintf(stderr, "Error: Cannot determine file size\n");
+        }
+        fclose(f);
+        return;
+    }
+    
+    if (size == 0) {
+        if (json_mode) {
+            printf("{\"tool\": \"strings\", \"file\": \"%s\", \"strings\": []}\n", filename);
+        } else {
+            fprintf(stderr, "Warning: File is empty\n");
+        }
+        fclose(f);
+        return;
+    }
+    
+    if (size > 100 * 1024 * 1024) {  // 100MB limit
+        if (json_mode) {
+            printf("{\"error\": \"File too large (max 100MB)\"}\n");
+        } else {
+            fprintf(stderr, "Error: File too large (max 100MB)\n");
+        }
+        fclose(f);
+        return;
+    }
+    
     fseek(f, 0, SEEK_SET);
     
     unsigned char *data = malloc(size);
-    fread(data, 1, size, f);
+    if (!data) {
+        if (json_mode) {
+            printf("{\"error\": \"Memory allocation failed\"}\n");
+        } else {
+            fprintf(stderr, "Error: Memory allocation failed\n");
+        }
+        fclose(f);
+        return;
+    }
+    
+    size_t bytes_read = fread(data, 1, size, f);
     fclose(f);
+    
+    if (bytes_read != (size_t)size) {
+        if (json_mode) {
+            printf("{\"error\": \"Failed to read complete file\"}\n");
+        } else {
+            fprintf(stderr, "Error: Failed to read complete file\n");
+        }
+        free(data);
+        return;
+    }
     
     char buf[1024];
     int len = 0;
@@ -80,7 +140,9 @@ void extract_strings(const char *filename, int min_len, int json_mode) {
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
-        printf("Usage: %s <file> [min_length] [--json]\n", argv[0]);
+        fprintf(stderr, "Usage: %s <file> [min_length] [--json]\n", argv[0]);
+        fprintf(stderr, "  min_length: minimum string length (default: 4)\n");
+        fprintf(stderr, "  --json: output in JSON format\n");
         return 1;
     }
     
@@ -92,6 +154,14 @@ int main(int argc, char *argv[]) {
             json_mode = 1;
         } else {
             min_len = atoi(argv[i]);
+            if (min_len < 1 || min_len > 1024) {
+                if (json_mode) {
+                    printf("{\"error\": \"Invalid min_length (must be 1-1024)\"}\n");
+                } else {
+                    fprintf(stderr, "Error: Invalid min_length (must be 1-1024)\n");
+                }
+                return 1;
+            }
         }
     }
     

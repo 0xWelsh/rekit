@@ -14,7 +14,8 @@ TARGETS = $(BIN_DIR)/dbi-framework \
           $(BIN_DIR)/pe-parser \
           $(BIN_DIR)/elf-parser \
           $(BIN_DIR)/memdump \
-          $(BIN_DIR)/strings
+          $(BIN_DIR)/strings \
+          $(BIN_DIR)/anti-debug-detect
 
 all: $(BIN_DIR) $(TARGETS)
 
@@ -40,6 +41,9 @@ $(BIN_DIR)/memdump: $(TOOLS_DIR)/memdump.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 $(BIN_DIR)/strings: $(ANALYSIS_DIR)/strings.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+$(BIN_DIR)/anti-debug-detect: $(ANALYSIS_DIR)/anti_debug_detect.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 clean:
