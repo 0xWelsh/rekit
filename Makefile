@@ -12,6 +12,7 @@ TARGETS = $(BIN_DIR)/dbi-framework \
           $(BIN_DIR)/dbi-advanced \
           $(BIN_DIR)/syscall-tracer \
           $(BIN_DIR)/pe-parser \
+          $(BIN_DIR)/elf-parser \
           $(BIN_DIR)/memdump \
           $(BIN_DIR)/strings
 
@@ -30,6 +31,9 @@ $(BIN_DIR)/syscall-tracer: $(DBI_DIR)/syscall-tracer.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 $(BIN_DIR)/pe-parser: $(PARSERS_DIR)/pe-parser.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+$(BIN_DIR)/elf-parser: $(PARSERS_DIR)/elf-parser.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 $(BIN_DIR)/memdump: $(TOOLS_DIR)/memdump.c

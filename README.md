@@ -41,6 +41,16 @@ A comprehensive collection of reverse engineering tools for binary analysis, dyn
 - Show entry point, image base
 - Identify x86/x64 architecture
 
+**elf-parser** - ELF binary structure analyzer
+```bash
+./bin/elf-parser /bin/ls
+```
+- Parse ELF headers (32/64-bit)
+- List program headers (segments)
+- Show section headers with flags
+- Display symbol table
+- Identify architecture (x86/x64/ARM)
+
 ### Analysis Tools
 
 **strings** - Extract printable strings
@@ -89,6 +99,11 @@ Builds all tools to `bin/` directory.
 ./bin/pe-parser malware.exe
 ```
 
+### Analyze ELF structure
+```bash
+./bin/elf-parser /bin/suspicious
+```
+
 ### Dump memory from running process
 ```bash
 # Find PID
@@ -124,8 +139,11 @@ rekit/
 # 1. Extract strings
 ./bin/strings malware.exe > strings.txt
 
-# 2. Parse structure
+# 2. Parse structure (Windows)
 ./bin/pe-parser malware.exe > structure.txt
+
+# 2. Parse structure (Linux)
+./bin/elf-parser ./malware > structure.txt
 
 # 3. Trace execution
 ./bin/syscall-tracer ./malware.exe > trace.txt
