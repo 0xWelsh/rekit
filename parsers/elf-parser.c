@@ -165,10 +165,12 @@ void print_symbols(void *base, Elf64_Ehdr *ehdr) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        printf("Usage: %s <elf_file>\n", argv[0]);
+    if (argc < 2) {
+        printf("Usage: %s <elf_file> [--json]\n", argv[0]);
         return 1;
     }
+    
+    int json_mode = (argc > 2 && strcmp(argv[2], "--json") == 0);
     
     int fd = open(argv[1], O_RDONLY);
     if (fd < 0) {
@@ -194,18 +196,33 @@ int main(int argc, char *argv[]) {
     
     // Verify ELF magic
     if (memcmp(ehdr->e_ident, ELFMAG, SELFMAG) != 0) {
-        printf("Error: Not a valid ELF file\n");
+        if (json_mode) {
+            printf("{\"error\": \"Not a valid ELF file\"}\n");
+        } else {
+            printf("Error: Not a valid ELF file\n");
+        }
         munmap(base, st.st_size);
         close(fd);
         return 1;
     }
     
-    printf("ELF File: %s\n", argv[1]);
-    
-    print_elf_header(ehdr);
-    print_program_headers(base, ehdr);
-    print_section_headers(base, ehdr);
-    print_symbols(base, ehdr);
+    if (json_mode) {
+        printf("{\n");
+        printf("  \"file\": \"%s\",\n", argv[1]);
+        printf("  \"type\": \"ELF\",\n");
+        printf("  \"class\": \"%s\",\n", ehdr->e_ident[EI_CLASS] == ELFCLASS64 ? "ELF64" : "ELF32");
+        printf("  \"machine\": \"%s\",\n", ehdr->e_machine == EM_X86_64 ? "x86-64" : "unknown");
+        printf("  \"entry_point\": \"0x%lx\",\n", ehdr->e_entry);
+        printf("  \"sections\": %d,\n", ehdr->e_shnum);
+        printf("  \"segments\": %d\n", ehdr->e_phnum);
+        printf("}\n");
+    } else {
+        printf("ELF File: %s\n", argv[1]);
+        print_elf_header(ehdr);
+        print_program_headers(base, ehdr);
+        print_section_headers(base, ehdr);
+        print_symbols(base, ehdr);
+    }
     
     munmap(base, st.st_size);
     close(fd);

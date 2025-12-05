@@ -84,6 +84,19 @@ Builds all tools to `bin/` directory.
 
 ## Usage Examples
 
+### JSON output for automation
+```bash
+# Individual tools
+./bin/strings binary --json > strings.json
+./bin/elf-parser binary --json > structure.json
+
+# Complete JSON report
+./examples/json_analysis.sh binary report.json
+
+# Use with jq
+./examples/json_analysis.sh binary - | jq '.hashes.sha256'
+```
+
 ### Full automated analysis
 ```bash
 ./examples/full_analysis.sh /path/to/binary
